@@ -1,0 +1,19 @@
+{
+    "configurations": [
+        {
+            "name": "Launch",
+            "type": "coreclr",
+            "request": "launch",
+            "program": "${workspaceFolder}/src/ApiCareer.Api/bin/Debug/net8.0/ApiCareer.Api.dll",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "Attach",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": ""
+        },
+    ]
+}
