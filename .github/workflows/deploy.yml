@@ -17,7 +17,7 @@ jobs:
           dotnet-version: '8.0.404'
 
       - name: Checkout repository
-        uses: actions/checkout@1      
+        uses: actions/checkout@v1      
 
       - name: Display version .NET
         run: dotnet --version
@@ -32,7 +32,8 @@ jobs:
       matrix: 
         dotnet: ['8.0.404']
     steps:
-      - name: Actions/setup-dotnet@v4
+      - name:  Setup .net
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: ${{ matrix.dotnet }}
 
@@ -71,7 +72,7 @@ jobs:
       - name: Save ssh key
         run: |
           # Save the private SSH key to a file
-          echo "${{secrets.SSH_KEY}}" > /tmp/id_rsa
+          echo "${{secrets.SSH_PRIVATE_KEY}}" > /tmp/id_rsa
           chmod 600 /tmp/id_rsa
   
       - name: Save last api build
@@ -112,7 +113,7 @@ jobs:
       - name: Save ssh key
         run: |
           # Save the private SSH key to a file
-          echo "${{ secrets.SSH_KEY }}" > /tmp/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/id_rsa
           chmod 600 /tmp/id_rsa
   
       - name: Save last api build
