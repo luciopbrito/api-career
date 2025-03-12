@@ -47,7 +47,7 @@ jobs:
         run: dotnet publish -o version-${{github.run_number}}-${{matrix.dotnet}}
 
       - name: Copy asdf file to publish version 
-        run: cp .tool-version version-${{github.run_number}}-${{matrix.dotnet}}/
+        run: cp .tool-versions version-${{github.run_number}}-${{matrix.dotnet}}/
 
       - name: Upload publish folder as artifact
         uses: actions/upload-artifact@v4
