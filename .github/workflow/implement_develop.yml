@@ -1,0 +1,40 @@
+name: Build the project and tests if it works correctly inside of runners
+
+on:
+  pull-request:
+    branches: develop
+
+jobs:
+  run-on-windows:
+    runs-on: windows-latest
+    steps: 
+      - name: Setup .Net Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+      - name: checkout pr
+        uses: actions/checkout@4
+      - name: Build project
+        run: dotnet build api-career.sln
+  run-on-ubuntu:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Setup .Net Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+      - name: checkout pr
+        uses: actions/checkout@4
+      - name: Build project
+        run: dotnet build api-career.sln
+  run-on-macos:
+    runs-on: macos-latest
+    steps: 
+      - name: Setup .Net Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+      - name: checkout pr
+        uses: actions/checkout@4
+      - name: Build project
+        run: dotnet build api-career.sln
