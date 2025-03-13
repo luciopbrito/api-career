@@ -75,9 +75,18 @@ jobs:
       - name: Save ssh key
         run: |
           # Save the private SSH key to a file
-          echo "${{secrets.SSH_PRIVATE_KEY}}" > /tmp/id_rsa
+          echo -e "${{secrets.SSH_PRIVATE_KEY}}" > /tmp/id_rsa
           chmod 600 /tmp/id_rsa
-  
+
+      - name: Ensure SSH directory exists
+        run: mkdir -p ~/.ssh
+
+      - name: Add SSH Host to Known Hosts
+        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+      
+      - name: Test SSH Connection
+        run: ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
+
       - name: Save last api build
         run: ssh -i /tmp/id_rsa ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "rm -r ${{secrets.SSH_DEST_BACKUP}}* && cp ${{secrets.SSH_DESTINATION}}* ${{secrets.SSH_DEST_BACKUP}}"
 
@@ -116,8 +125,17 @@ jobs:
       - name: Save ssh key
         run: |
           # Save the private SSH key to a file
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > /tmp/id_rsa
+          echo -e "${{secrets.SSH_PRIVATE_KEY}}" > /tmp/id_rsa
           chmod 600 /tmp/id_rsa
+
+      - name: Ensure SSH directory exists
+        run: mkdir -p ~/.ssh
+
+      - name: Add SSH Host to Known Hosts
+        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
+      
+      - name: Test SSH Connection
+        run: ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
   
       - name: Save last api build
         run: ssh -i /tmp/id_rsa ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "rm -r ${{secrets.SSH_DEST_BACKUP}}* && cp ${{secrets.SSH_DESTINATION}}* ${{secrets.SSH_DEST_BACKUP}}"
