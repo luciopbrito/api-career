@@ -88,7 +88,13 @@ jobs:
         run: ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
 
       - name: Save last api build
-        run: ssh -i /tmp/id_rsa ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "rm -r ${{secrets.SSH_DEST_BACKUP}}* && cp ${{secrets.SSH_DESTINATION}}* ${{secrets.SSH_DEST_BACKUP}}"
+        run: |
+          # Check if the folder is not empty
+          if [ "$(ls -A ${{secrets.SSH_DESTINATION}})" ]; then
+            ssh -i /tmp/id_rsa ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "rm -r ${{secrets.SSH_DEST_BACKUP}}* && cp ${{secrets.SSH_DESTINATION}}* ${{secrets.SSH_DEST_BACKUP}}"
+          else
+            echo "The folder is empty. No command will be run."
+          fi
 
       - name: Deploy publish folder to vps
         run: |
@@ -138,8 +144,14 @@ jobs:
         run: ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
   
       - name: Save last api build
-        run: ssh -i /tmp/id_rsa ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "rm -r ${{secrets.SSH_DEST_BACKUP}}* && cp ${{secrets.SSH_DESTINATION}}* ${{secrets.SSH_DEST_BACKUP}}"
-
+        run: |
+          # Check if the folder is not empty
+          if [ "$(ls -A ${{secrets.SSH_DESTINATION}})" ]; then
+            ssh -i /tmp/id_rsa ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "rm -r ${{secrets.SSH_DEST_BACKUP}}* && cp ${{secrets.SSH_DESTINATION}}* ${{secrets.SSH_DEST_BACKUP}}"
+          else
+            echo "The folder is empty. No command will be run."
+          fi
+          
       - name: Deploy publish folder to vps
         run: |
           # deploy publish folder to vps
