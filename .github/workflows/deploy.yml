@@ -109,7 +109,7 @@ jobs:
       - name: Restart Web Server 
         run: | 
           # restart webserver
-          ssh -i /tmp/id_rsa ${{ secrets.SSH_USERNAME }}@$${{ secrets.SSH_HOST }} "${{ secrets.SSH_CMD_RESTART_SERVER }}"
+          ssh -i /tmp/id_rsa ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "${{ secrets.SSH_CMD_RESTART_SERVER }}"
       
       - name: Clean up
         run: |
@@ -170,7 +170,7 @@ jobs:
       - name: Restart Web Server 
         run: | 
           # restart webserver
-          ssh -i /tmp/id_rsa ${{ secrets.SSH_USERNAME }}@$${{ secrets.SSH_HOST }} "${{ secrets.SSH_CMD_RESTART_SERVER }}"
+          ssh -i /tmp/id_rsa ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "${{ secrets.SSH_CMD_RESTART_SERVER }}"
       
       - name: Clean up
         run: |
