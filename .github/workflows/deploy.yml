@@ -54,6 +54,7 @@ jobs:
         with:
           name: version-publish
           path: version-${{github.run_number}}-${{matrix.dotnet}}/
+          include-hidden-files: true
 
   to-staging:
     needs: build-version-publish
