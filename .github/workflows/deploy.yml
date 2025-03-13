@@ -99,7 +99,7 @@ jobs:
           else
             echo "The folder contains files. Running command..."
             # Run your command remotely
-            ssh -i /tmp/id_rsa ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "rm -r ${{secrets.SSH_DEST_BACKUP}}* && cp ${{secrets.SSH_DESTINATION}}* ${{secrets.SSH_DEST_BACKUP}}"
+            ssh -i /tmp/id_rsa ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "rm -rf ${{secrets.SSH_DEST_BACKUP}}* && cp ${{secrets.SSH_DESTINATION}}* ${{secrets.SSH_DEST_BACKUP}}"
           fi
 
       - name: Deploy publish folder to vps
@@ -160,7 +160,7 @@ jobs:
           else
             echo "The folder contains files. Running command..."
             # Run your command remotely
-            ssh -i /tmp/id_rsa ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "rm -r ${{secrets.SSH_DEST_BACKUP}}* && cp ${{secrets.SSH_DESTINATION}}* ${{secrets.SSH_DEST_BACKUP}}"
+            ssh -i /tmp/id_rsa ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "rm -rf ${{secrets.SSH_DEST_BACKUP}}* && cp ${{secrets.SSH_DESTINATION}}* ${{secrets.SSH_DEST_BACKUP}}"
           fi
           
       - name: Deploy publish folder to vps
