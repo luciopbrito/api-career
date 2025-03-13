@@ -31,6 +31,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+if (app.Environment.IsStaging()) {
+    app.UseSwagger();
+    app.UseSwaggerUI(c => {
+        c.SwaggerEndpoint("/api-career/swagger/v1/swagger.json", "API v1");
+        c.RoutePrefix = string.Empty;
+    });
+}
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
