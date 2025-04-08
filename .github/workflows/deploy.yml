@@ -82,16 +82,13 @@ jobs:
       - name: Ensure SSH directory exists
         run: mkdir -p ~/.ssh
 
-      - name: Add SSH Host to Known Hosts
-        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
-      
       - name: Test SSH Connection
-        run: ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
+        run: ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
 
       - name: Save last api build
         run: |
           # SSH into the remote host and check if the folder is empty
-          SSH_RESULT=$(ssh -i /tmp/id_rsa ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "ls -A ${{secrets.SSH_DESTINATION}}")
+          SSH_RESULT=$(ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "ls -A ${{secrets.SSH_DESTINATION}}")
           
           # Check if the SSH command output is empty (meaning folder is empty)
           if [ -z "$SSH_RESULT" ]; then
@@ -99,18 +96,18 @@ jobs:
           else
             echo "The folder contains files. Running command..."
             # Run your command remotely
-            ssh -i /tmp/id_rsa ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "rm -rf ${{secrets.SSH_DEST_BACKUP}}* && cp ${{secrets.SSH_DESTINATION}}* ${{secrets.SSH_DEST_BACKUP}}"
+            ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "rm -rf ${{secrets.SSH_DEST_BACKUP}}* && cp ${{secrets.SSH_DESTINATION}}* ${{secrets.SSH_DEST_BACKUP}}"
           fi
 
       - name: Deploy publish folder to vps
         run: |
           # deploy publish folder to vps
-          rsync -avz --delete -e "ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no" version-${{github.run_number}}/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_DESTINATION }}  
+          rsync -avz --delete -e "ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" version-${{github.run_number}}/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_DESTINATION }}  
           
       - name: Restart Web Server 
         run: | 
           # restart webserver
-          ssh -i /tmp/id_rsa ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "${{ secrets.SSH_CMD_RESTART_SERVER }}"
+          ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "${{ secrets.SSH_CMD_RESTART_SERVER }}"
       
       - name: Clean up
         run: |
@@ -142,17 +139,14 @@ jobs:
 
       - name: Ensure SSH directory exists
         run: mkdir -p ~/.ssh
-
-      - name: Add SSH Host to Known Hosts
-        run: ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
       
       - name: Test SSH Connection
-        run: ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
+        run: ssh -i /tmp/id_rsa  -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
   
       - name: Save last api build
         run: |
           # SSH into the remote host and check if the folder is empty
-          SSH_RESULT=$(ssh -i /tmp/id_rsa ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "ls -A ${{secrets.SSH_DESTINATION}}")
+          SSH_RESULT=$(ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "ls -A ${{secrets.SSH_DESTINATION}}")
           
           # Check if the SSH command output is empty (meaning folder is empty)
           if [ -z "$SSH_RESULT" ]; then
@@ -160,18 +154,18 @@ jobs:
           else
             echo "The folder contains files. Running command..."
             # Run your command remotely
-            ssh -i /tmp/id_rsa ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "rm -rf ${{secrets.SSH_DEST_BACKUP}}* && cp ${{secrets.SSH_DESTINATION}}* ${{secrets.SSH_DEST_BACKUP}}"
+            ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "rm -rf ${{secrets.SSH_DEST_BACKUP}}* && cp ${{secrets.SSH_DESTINATION}}* ${{secrets.SSH_DEST_BACKUP}}"
           fi
           
       - name: Deploy publish folder to vps
         run: |
           # deploy publish folder to vps
-          rsync -avz --delete -e "ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no" version-${{github.run_number}}/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_DESTINATION }}  
+          rsync -avz --delete -e "ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" version-${{github.run_number}}/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_DESTINATION }}  
           
       - name: Restart Web Server 
         run: | 
           # restart webserver
-          ssh -i /tmp/id_rsa ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "${{ secrets.SSH_CMD_RESTART_SERVER }}"
+          ssh -i /tmp/id_rsa $-p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "${{ secrets.SSH_CMD_RESTART_SERVER }}"
       
       - name: Clean up
         run: |
