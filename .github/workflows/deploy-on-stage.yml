@@ -1,0 +1,39 @@
+name: deploy on server
+
+on:
+  push:
+    branches: 
+      - develop
+
+  workflow_dispatch:
+
+jobs:
+    to-staging:
+        environment: stage
+        runs-on: ubuntu-latest
+        steps:
+          - name: Set up Tailscale for Network
+            uses: tailscale/github-action@v3
+            with:
+              authkey: ${{secrets.TAILSCALE_AUTH_KEY}}
+    
+          - name: Checkout repository
+            uses: actions/checkout@v2
+              
+          - name: Copy docker file
+            uses: appleboy/scp-action@v1
+            with:
+              host: ${{ secrets.SSH_HOST }}
+              username: ${{ secrets.SSH_USERNAME }}
+              port: ${{ secrets.SSH_PORT }}
+              source: "docker-compose.prod.yml"
+              target: /tmp/
+          
+          - name: set up docker
+            uses: appleboy/ssh-action@v1
+            with:
+              host: ${{ secrets.SSH_HOST }}
+              username: ${{ secrets.SSH_USERNAME }}
+              port: ${{ secrets.SSH_PORT }}
+              script: ${{secrets.CMD_RUN_SERVICE}}
+    

@@ -1,7 +1,7 @@
 name: Build the project and tests if it works correctly inside of runners
 
 on:
-  pull-request:
+  pull_request:
     branches: develop
 
 jobs:
@@ -13,7 +13,7 @@ jobs:
         with:
           dotnet-version: '8.x'
       - name: checkout pr
-        uses: actions/checkout@4
+        uses: actions/checkout@v4
       - name: Build project
         run: dotnet build api-career.sln
   run-on-ubuntu:
@@ -24,7 +24,7 @@ jobs:
         with:
           dotnet-version: '8.x'
       - name: checkout pr
-        uses: actions/checkout@4
+        uses: actions/checkout@v4
       - name: Build project
         run: dotnet build api-career.sln
   run-on-macos:
@@ -35,6 +35,6 @@ jobs:
         with:
           dotnet-version: '8.x'
       - name: checkout pr
-        uses: actions/checkout@4
+        uses: actions/checkout@v4
       - name: Build project
         run: dotnet build api-career.sln

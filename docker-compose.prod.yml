@@ -1,0 +1,40 @@
+version: "3.8"
+services:
+  api-career:
+    image: luciopbrito/api-career:1
+    env_file:
+      - .env.api.production
+    ports:
+      - 5000:5000
+    networks:
+      - backend
+    depends_on:
+      - db
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  db:
+    image: postgres:16-alpine
+    container_name: db-api-career
+    env_file:
+      - .env.db.production
+    volumes:
+      - career_db:/var/lib/postgresql/data
+    ports:
+      - 8080:5432
+    networks:
+      - backend
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+volumes:
+  career_db:
+    external: true
+
+networks:
+  backend:
+    driver: overlay

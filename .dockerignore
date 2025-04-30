@@ -1,0 +1,6 @@
+.vscode/
+.github/
+.editorconfig
+.gitignore
+.tool-version
+*.md
