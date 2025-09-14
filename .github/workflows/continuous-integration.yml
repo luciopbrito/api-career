@@ -1,0 +1,15 @@
+name: Continuous Integration API Career
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  to-staging:
+    uses: luciopbrito/actions/.github/workflows/dotnet-ci.yml@main
+    secrets: inherit
+    with:
+      environment: 'stage'
+      dotnet_version: '8.0.404'
+      version_to_build: ${{github.sha}}

@@ -1,0 +1,13 @@
+name: CI API Career
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  to-staging:
+    uses: luciopbrito/actions/.github/workflows/dotnet-ci.yml@main
+    secrets: inherit
