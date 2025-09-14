@@ -37,6 +37,16 @@ if (app.Environment.IsStaging()) {
         c.SwaggerEndpoint("/api-career/swagger/v1/swagger.json", "API v1");
         c.RoutePrefix = "swagger";
     });
+        
+    app.Use(async (context, next) =>
+    {
+        if (context.Request.Path == "/index.html" || context.Request.Path == "/")
+        {
+            context.Response.Redirect("/swagger", permanent: false);
+            return;
+        }
+        await next();
+    });
 }
 
 app.UseHttpsRedirection();
