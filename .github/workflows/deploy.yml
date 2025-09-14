@@ -1,0 +1,173 @@
+name: deploy on server
+
+on:
+  push:
+    branches: 
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  build: 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.404'
+
+      - name: Checkout repository
+        uses: actions/checkout@v1      
+
+      - name: Display version .NET
+        run: dotnet --version
+
+      - name: Build project
+        run: dotnet build api-career.sln
+  
+  build-version-publish:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: 
+        dotnet: ['8.0.404']
+    steps:
+      - name:  Setup .net
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: ${{ matrix.dotnet }}
+
+      - name: Display version .NET
+        run: dotnet --version
+
+      - name: Checkout repository
+        uses: actions/checkout@v1 
+
+      - name: Build publish version
+        run: dotnet publish -o version-${{github.run_number}}-${{matrix.dotnet}}
+
+      - name: Copy asdf file to publish version 
+        run: cp .tool-versions version-${{github.run_number}}-${{matrix.dotnet}}/
+
+      - name: Upload publish folder as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: version-publish
+          path: version-${{github.run_number}}-${{matrix.dotnet}}/
+          include-hidden-files: true
+
+  to-staging:
+    needs: build-version-publish
+    environment: stage
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: version-publish
+          path: version-${{github.run_number}}
+
+      - name: Display structure of downloaded files
+        run: ls -R version-${{github.run_number}}
+
+      - name: Save ssh key
+        run: |
+          # Save the private SSH key to a file
+          echo -e "${{secrets.SSH_PRIVATE_KEY}}" > /tmp/id_rsa
+          chmod 600 /tmp/id_rsa
+
+      - name: Ensure SSH directory exists
+        run: mkdir -p ~/.ssh
+
+      - name: Test SSH Connection
+        run: ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
+
+      - name: Save last api build
+        run: |
+          # SSH into the remote host and check if the folder is empty
+          SSH_RESULT=$(ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "ls -A ${{secrets.SSH_DESTINATION}}")
+          
+          # Check if the SSH command output is empty (meaning folder is empty)
+          if [ -z "$SSH_RESULT" ]; then
+            echo "The folder is empty. No command will be run."
+          else
+            echo "The folder contains files. Running command..."
+            # Run your command remotely
+            ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "rm -rf ${{secrets.SSH_DEST_BACKUP}}* && cp ${{secrets.SSH_DESTINATION}}* ${{secrets.SSH_DEST_BACKUP}}"
+          fi
+
+      - name: Deploy publish folder to vps
+        run: |
+          # deploy publish folder to vps
+          rsync -avz --delete -e "ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" version-${{github.run_number}}/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_DESTINATION }}  
+          
+      - name: Restart Web Server 
+        run: | 
+          # restart webserver
+          ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "${{ secrets.SSH_CMD_RESTART_SERVER }}"
+      
+      - name: Clean up
+        run: |
+          # Clean up
+          rm /tmp/id_rsa
+
+  to-production:
+    needs: to-staging
+    environment: production
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: version-publish
+          path: version-${{github.run_number}}
+
+      - name: Display structure of downloaded files
+        run: ls -R version-${{github.run_number}}
+
+      - name: Save ssh key
+        run: |
+          # Save the private SSH key to a file
+          echo -e "${{secrets.SSH_PRIVATE_KEY}}" > /tmp/id_rsa
+          chmod 600 /tmp/id_rsa
+
+      - name: Ensure SSH directory exists
+        run: mkdir -p ~/.ssh
+      
+      - name: Test SSH Connection
+        run: ssh -i /tmp/id_rsa  -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "echo 'SSH connection successful'"
+  
+      - name: Save last api build
+        run: |
+          # SSH into the remote host and check if the folder is empty
+          SSH_RESULT=$(ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "ls -A ${{secrets.SSH_DESTINATION}}")
+          
+          # Check if the SSH command output is empty (meaning folder is empty)
+          if [ -z "$SSH_RESULT" ]; then
+            echo "The folder is empty. No command will be run."
+          else
+            echo "The folder contains files. Running command..."
+            # Run your command remotely
+            ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} ${{secrets.SSH_USERNAME}}@${{secrets.SSH_HOST}} "rm -rf ${{secrets.SSH_DEST_BACKUP}}* && cp ${{secrets.SSH_DESTINATION}}* ${{secrets.SSH_DEST_BACKUP}}"
+          fi
+          
+      - name: Deploy publish folder to vps
+        run: |
+          # deploy publish folder to vps
+          rsync -avz --delete -e "ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} -o StrictHostKeyChecking=no" version-${{github.run_number}}/ ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }}:${{ secrets.SSH_DESTINATION }}  
+          
+      - name: Restart Web Server 
+        run: | 
+          # restart webserver
+          ssh -i /tmp/id_rsa -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USERNAME }}@${{ secrets.SSH_HOST }} "${{ secrets.SSH_CMD_RESTART_SERVER }}"
+      
+      - name: Clean up
+        run: |
+          # Clean up
+          rm /tmp/id_rsa
