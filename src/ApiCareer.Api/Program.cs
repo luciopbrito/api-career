@@ -35,7 +35,7 @@ if (app.Environment.IsStaging()) {
     app.UseSwagger();
     app.UseSwaggerUI(c => {
         c.SwaggerEndpoint("/api-career/swagger/v1/swagger.json", "API v1");
-        c.RoutePrefix = "swagger";
+        c.RoutePrefix = "api-career/swagger";
     });
         
     app.Use(async (context, next) =>
