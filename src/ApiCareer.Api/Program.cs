@@ -42,7 +42,7 @@ if (app.Environment.IsStaging()) {
     {
         if (context.Request.Path == "/index.html" || context.Request.Path == "/")
         {
-            context.Response.Redirect("/swagger", permanent: false);
+            context.Response.Redirect("/api-career/swagger", permanent: false);
             return;
         }
         await next();
