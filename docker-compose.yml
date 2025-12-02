@@ -1,0 +1,31 @@
+version: "3.8"
+services:
+  api-career:
+    container_name: api-career
+    build: .
+    env_file:
+      - .env.api.production
+    ports:
+      - 2000:5000
+    networks:
+      - backend
+    depends_on:
+      - db
+  db:
+    container_name: db-api-career
+    image: postgres:16-alpine
+    env_file:
+      - .env.db.production
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    ports:
+      - 8080:5432
+    networks:
+      - backend
+
+volumes:
+  db_data:
+
+networks:
+  backend:
+    driver: bridge
